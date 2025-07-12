@@ -22,7 +22,10 @@ import {
   Alert,
   CardActionArea,
   IconButton,
-  Tooltip
+  Tooltip,
+  Rating,
+  Fab,
+  Snackbar
 } from '@mui/material';
 import { 
   Add, 
@@ -34,7 +37,12 @@ import {
   BookOnline,
   Schedule,
   Star,
-  Directions
+  Directions,
+  AccessTime,
+  Business,
+  CheckCircle,
+  Warning,
+  Info
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
@@ -58,6 +66,8 @@ const ServiceStations = () => {
   });
   const [message, setMessage] = useState('');
   const [severity, setSeverity] = useState('info');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   useEffect(() => {
     fetchStations();
@@ -88,19 +98,19 @@ const ServiceStations = () => {
     try {
       if (editingStation) {
         await api.put(`/api/accounts/service-stations/${editingStation.id}/`, form);
-        setMessage('Service station updated successfully!');
+        setSnackbarMessage('Service station updated successfully!');
       } else {
         await api.post('/api/accounts/service-stations/', form);
-        setMessage('Service station created successfully!');
+        setSnackbarMessage('Service station created successfully!');
       }
-      setSeverity('success');
+      setSnackbarOpen(true);
       setOpenDialog(false);
       setEditingStation(null);
       resetForm();
       fetchStations();
     } catch (error) {
-      setMessage('Failed to save service station');
-      setSeverity('error');
+      setSnackbarMessage('Failed to save service station');
+      setSnackbarOpen(true);
     }
   };
 
@@ -122,12 +132,12 @@ const ServiceStations = () => {
     if (window.confirm('Are you sure you want to delete this service station?')) {
       try {
         await api.delete(`/api/accounts/service-stations/${stationId}/`);
-        setMessage('Service station deleted successfully!');
-        setSeverity('success');
+        setSnackbarMessage('Service station deleted successfully!');
+        setSnackbarOpen(true);
         fetchStations();
       } catch (error) {
-        setMessage('Failed to delete service station');
-        setSeverity('error');
+        setSnackbarMessage('Failed to delete service station');
+        setSnackbarOpen(true);
       }
     }
   };
@@ -149,13 +159,19 @@ const ServiceStations = () => {
   };
 
   const handleBookAppointment = (station) => {
+    // Show feedback before navigation
+    setSnackbarMessage(`Redirecting to book appointment at ${station.name}...`);
+    setSnackbarOpen(true);
+    
     // Navigate to appointments page with station pre-selected
-    navigate('/appointments', { 
-      state: { 
-        selectedStation: station,
-        fromServiceStations: true 
-      } 
-    });
+    setTimeout(() => {
+      navigate('/appointments', { 
+        state: { 
+          selectedStation: station,
+          fromServiceStations: true 
+        } 
+      });
+    }, 1000);
   };
 
   const handleGetDirections = (station) => {
@@ -170,13 +186,32 @@ const ServiceStations = () => {
     }
   };
 
+  const getStationStatus = (station) => {
+    // Mock status - in real app this would come from backend
+    const now = new Date().getHours();
+    if (now >= 8 && now <= 18) {
+      return { status: 'open', color: 'success', icon: <CheckCircle /> };
+    } else {
+      return { status: 'closed', color: 'error', icon: <Warning /> };
+    }
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
   return (
     <Container component="main" maxWidth="lg">
       <Box sx={{ marginTop: 4, marginBottom: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography component="h1" variant="h4">
-            Service Stations
-          </Typography>
+          <Box>
+            <Typography component="h1" variant="h4" gutterBottom>
+              Service Stations
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Find and book services at nearby car service stations
+            </Typography>
+          </Box>
           {(user?.role === 'admin' || user?.role === 'stations') && (
             <Button
               variant="contained"
@@ -186,6 +221,7 @@ const ServiceStations = () => {
                 resetForm();
                 setOpenDialog(true);
               }}
+              sx={{ borderRadius: 2 }}
             >
               Add Service Station
             </Button>
@@ -199,129 +235,194 @@ const ServiceStations = () => {
         )}
 
         <Grid container spacing={3}>
-          {stations.map((station) => (
-            <Grid item xs={12} md={6} lg={4} key={station.id}>
-              <Card 
-                sx={{ 
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 4,
-                  }
-                }}
-              >
-                <CardActionArea 
-                  onClick={() => handleBookAppointment(station)}
-                  sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+          {stations.map((station) => {
+            const statusInfo = getStationStatus(station);
+            return (
+              <Grid item xs={12} md={6} lg={4} key={station.id}>
+                <Card 
+                  sx={{ 
+                    height: '100%',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    '&:hover': {
+                      transform: 'translateY(-8px)',
+                      boxShadow: 8,
+                    }
+                  }}
                 >
-                  <CardContent sx={{ flex: 1 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                      <Typography variant="h6" gutterBottom>
-                        {station.name}
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 0.5 }}>
-                        <Star sx={{ fontSize: 16, color: 'warning.main' }} />
-                        <Star sx={{ fontSize: 16, color: 'warning.main' }} />
-                        <Star sx={{ fontSize: 16, color: 'warning.main' }} />
-                        <Star sx={{ fontSize: 16, color: 'warning.main' }} />
-                        <Star sx={{ fontSize: 16, color: 'grey.300' }} />
+                  <CardActionArea 
+                    onClick={() => handleBookAppointment(station)}
+                    sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+                  >
+                    <CardContent sx={{ flex: 1, p: 3 }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                        <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+                          {station.name}
+                        </Typography>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <Rating value={4.2} precision={0.1} size="small" readOnly />
+                          <Typography variant="body2" color="text.secondary">
+                            (4.2)
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-                    
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <LocationOn sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {station.address}
-                      </Typography>
-                    </Box>
-                    
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Phone sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {station.phone}
-                      </Typography>
-                    </Box>
-                    
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                      <Email sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {station.email}
-                      </Typography>
-                    </Box>
-                    
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary" gutterBottom>
-                        Services Offered:
-                      </Typography>
-                      {station.services_offered.map((service) => (
+                      
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <LocationOn sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} />
+                        <Typography variant="body2" color="text.secondary">
+                          {station.address}
+                        </Typography>
+                      </Box>
+                      
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                        <Phone sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} />
+                        <Typography variant="body2" color="text.secondary">
+                          {station.phone}
+                        </Typography>
+                      </Box>
+                      
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        <Email sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} />
+                        <Typography variant="body2" color="text.secondary">
+                          {station.email}
+                        </Typography>
+                      </Box>
+
+                      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                        {statusInfo.icon}
                         <Chip
-                          key={service.id}
-                          label={service.name}
+                          label={statusInfo.status}
+                          color={statusInfo.color}
                           size="small"
-                          sx={{ mr: 0.5, mb: 0.5 }}
+                          sx={{ ml: 1 }}
                         />
-                      ))}
-                    </Box>
-                  </CardContent>
-                </CardActionArea>
-                
-                <CardActions sx={{ justifyContent: 'space-between', p: 2 }}>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Tooltip title="Book Appointment">
-                      <IconButton
-                        color="primary"
-                        onClick={() => handleBookAppointment(station)}
-                        size="small"
-                      >
-                        <BookOnline />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Get Directions">
-                      <IconButton
-                        color="secondary"
-                        onClick={() => handleGetDirections(station)}
-                        size="small"
-                      >
-                        <Directions />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
+                      </Box>
+                      
+                      <Box sx={{ mb: 2 }}>
+                        <Typography variant="body2" color="text.secondary" gutterBottom sx={{ fontWeight: 500 }}>
+                          Services Offered:
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {station.services_offered.map((service) => (
+                            <Chip
+                              key={service.id}
+                              label={service.name}
+                              size="small"
+                              variant="outlined"
+                              sx={{ 
+                                fontSize: '0.75rem',
+                                '&:hover': {
+                                  backgroundColor: 'primary.light',
+                                  color: 'white',
+                                }
+                              }}
+                            />
+                          ))}
+                        </Box>
+                      </Box>
+                    </CardContent>
+                  </CardActionArea>
                   
-                  {(user?.role === 'admin' || (user?.role === 'stations' && station.owner === user.id)) && (
-                    <Box sx={{ display: 'flex', gap: 0.5 }}>
-                      <Tooltip title="Edit Station">
+                  <CardActions sx={{ justifyContent: 'space-between', p: 2, pt: 0 }}>
+                    <Box sx={{ display: 'flex', gap: 1 }}>
+                      <Tooltip title="Book Appointment">
                         <IconButton
+                          color="primary"
+                          onClick={() => handleBookAppointment(station)}
                           size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEdit(station);
+                          sx={{
+                            backgroundColor: 'primary.light',
+                            color: 'white',
+                            '&:hover': {
+                              backgroundColor: 'primary.dark',
+                            }
                           }}
                         >
-                          <Edit />
+                          <BookOnline />
                         </IconButton>
                       </Tooltip>
-                      <Tooltip title="Delete Station">
+                      <Tooltip title="Get Directions">
                         <IconButton
+                          color="secondary"
+                          onClick={() => handleGetDirections(station)}
                           size="small"
-                          color="error"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDelete(station.id);
+                          sx={{
+                            backgroundColor: 'secondary.light',
+                            color: 'white',
+                            '&:hover': {
+                              backgroundColor: 'secondary.dark',
+                            }
                           }}
                         >
-                          <Delete />
+                          <Directions />
                         </IconButton>
                       </Tooltip>
                     </Box>
-                  )}
-                </CardActions>
-              </Card>
-            </Grid>
-          ))}
+                    
+                    {(user?.role === 'admin' || (user?.role === 'stations' && station.owner === user.id)) && (
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <Tooltip title="Edit Station">
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleEdit(station);
+                            }}
+                            sx={{
+                              backgroundColor: 'info.light',
+                              color: 'white',
+                              '&:hover': {
+                                backgroundColor: 'info.dark',
+                              }
+                            }}
+                          >
+                            <Edit />
+                          </IconButton>
+                        </Tooltip>
+                        <Tooltip title="Delete Station">
+                          <IconButton
+                            size="small"
+                            color="error"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDelete(station.id);
+                            }}
+                            sx={{
+                              backgroundColor: 'error.light',
+                              color: 'white',
+                              '&:hover': {
+                                backgroundColor: 'error.dark',
+                              }
+                            }}
+                          >
+                            <Delete />
+                          </IconButton>
+                        </Tooltip>
+                      </Box>
+                    )}
+                  </CardActions>
+                </Card>
+              </Grid>
+            );
+          })}
         </Grid>
+
+        {/* Floating Action Button for quick booking */}
+        <Fab
+          color="primary"
+          aria-label="book appointment"
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+            zIndex: 1000,
+          }}
+          onClick={() => navigate('/appointments')}
+        >
+          <BookOnline />
+        </Fab>
 
         {/* Add/Edit Dialog */}
         <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="md" fullWidth>
@@ -424,6 +525,14 @@ const ServiceStations = () => {
             </DialogActions>
           </Box>
         </Dialog>
+
+        {/* Snackbar for feedback */}
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={3000}
+          onClose={handleSnackbarClose}
+          message={snackbarMessage}
+        />
       </Box>
     </Container>
   );

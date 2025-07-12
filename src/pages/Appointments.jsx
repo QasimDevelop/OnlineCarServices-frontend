@@ -27,7 +27,11 @@ import {
   CardActionArea,
   IconButton,
   Tooltip,
-  Divider
+  Divider,
+  Rating,
+  Fab,
+  Snackbar,
+  LinearProgress
 } from '@mui/material';
 import { 
   Add, 
@@ -46,7 +50,13 @@ import {
   CheckCircle,
   Pending,
   Cancel,
-  Directions
+  Directions,
+  Event,
+  Clock,
+  Star,
+  Info,
+  Warning,
+  Success
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api.js';
@@ -102,26 +112,37 @@ const Appointments = () => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
   
   // Check if we came from ServiceStations with a pre-selected station
   const preSelectedStation = location.state?.selectedStation;
   const fromServiceStations = location.state?.fromServiceStations;
 
   useEffect(() => {
-    fetchAppointments();
-    fetchServiceStations();
-    fetchServiceTypes();
+    const initializeData = async () => {
+      setIsLoading(true);
+      await Promise.all([
+        fetchAppointments(),
+        fetchServiceStations(),
+        fetchServiceTypes()
+      ]);
+      
+      // If we have a pre-selected station from ServiceStations, set it up
+      if (preSelectedStation && fromServiceStations) {
+        setSelectedStation(preSelectedStation.id);
+        setForm(prev => ({
+          ...prev,
+          service_station: preSelectedStation.id
+        }));
+        // Clear the location state to prevent re-applying on refresh
+        navigate(location.pathname, { replace: true });
+      }
+      setIsLoading(false);
+    };
     
-    // If we have a pre-selected station from ServiceStations, set it up
-    if (preSelectedStation && fromServiceStations) {
-      setSelectedStation(preSelectedStation.id);
-      setForm(prev => ({
-        ...prev,
-        service_station: preSelectedStation.id
-      }));
-      // Clear the location state to prevent re-applying on refresh
-      navigate(location.pathname, { replace: true });
-    }
+    initializeData();
   }, [preSelectedStation, fromServiceStations, navigate, location.pathname]);
 
   const fetchAppointments = async () => {
@@ -165,7 +186,7 @@ const Appointments = () => {
           form,
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setMessage("Appointment updated successfully!");
+        setSnackbarMessage("Appointment updated successfully!");
       } else {
         // Create new appointment
         await axios.post(
@@ -179,9 +200,9 @@ const Appointments = () => {
           },
           { headers: { Authorization: `Bearer ${token}` } }
         );
-        setMessage("Appointment scheduled successfully!");
+        setSnackbarMessage("Appointment scheduled successfully!");
       }
-      setSeverity("success");
+      setSnackbarOpen(true);
       setOpenDialog(false);
       setEditingAppointment(null);
       setForm({
@@ -198,11 +219,11 @@ const Appointments = () => {
       setNotes('');
       await fetchAppointments();
     } catch (err) {
-      setMessage(
+      setSnackbarMessage(
         err.response?.data?.error ||
         "Failed to schedule/update appointment. Please check your input."
       );
-      setSeverity("error");
+      setSnackbarOpen(true);
     }
     setLoading(false);
   };
@@ -223,12 +244,12 @@ const Appointments = () => {
     if (window.confirm('Are you sure you want to delete this appointment?')) {
       try {
         await api.delete(`/api/accounts/appointments/${appointmentId}/`);
-        setMessage('Appointment deleted successfully!');
-        setSeverity('success');
+        setSnackbarMessage('Appointment deleted successfully!');
+        setSnackbarOpen(true);
         fetchAppointments();
       } catch (error) {
-        setMessage('Failed to delete appointment');
-        setSeverity('error');
+        setSnackbarMessage('Failed to delete appointment');
+        setSnackbarOpen(true);
       }
     }
   };
@@ -263,9 +284,9 @@ const Appointments = () => {
       case 'confirmed': return <CheckCircle />;
       case 'pending': return <Pending />;
       case 'in_progress': return <Schedule />;
-      case 'completed': return <CheckCircle />;
+      case 'completed': return <Success />;
       case 'cancelled': return <Cancel />;
-      default: return <Schedule />;
+      default: return <Info />;
     }
   };
 
@@ -317,16 +338,38 @@ const Appointments = () => {
     setSelectedService(null);
   };
 
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
   // Only allow today or future dates
   const minDate = dayjs().format("YYYY-MM-DD");
+
+  if (isLoading) {
+    return (
+      <Container component="main" maxWidth="lg">
+        <Box sx={{ marginTop: 4, marginBottom: 4 }}>
+          <LinearProgress />
+          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+            <CircularProgress />
+          </Box>
+        </Box>
+      </Container>
+    );
+  }
 
   return (
     <Container component="main" maxWidth="lg">
       <Box sx={{ marginTop: 4, marginBottom: 4 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Typography component="h1" variant="h4">
-            Appointments
-          </Typography>
+          <Box>
+            <Typography component="h1" variant="h4" gutterBottom>
+              Appointments
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Manage your car service appointments and bookings
+            </Typography>
+          </Box>
           {user?.role === 'user' && (
             <Button
               variant="contained"
@@ -336,6 +379,7 @@ const Appointments = () => {
                 resetForm();
                 setOpenDialog(true);
               }}
+              sx={{ borderRadius: 2 }}
             >
               Book Appointment
             </Button>
@@ -350,23 +394,26 @@ const Appointments = () => {
 
         <div>
           <Button
-            variant="contained"
+            variant="outlined"
             color="primary"
             onClick={handleSearch}
             disabled={loading}
             sx={{ mb: 2 }}
+            startIcon={loading ? <CircularProgress size={20} /> : <LocationOn />}
           >
-            {loading ? <CircularProgress size={24} /> : "Find Nearby Stations"}
+            {loading ? "Searching..." : "Find Nearby Stations"}
           </Button>
-          <Paper elevation={2}>
+          <Paper elevation={2} sx={{ mb: 3 }}>
             <List>
               {stations.map(station => (
                 <ListItem
                   key={station.id}
                   secondaryAction={
                     <Button
-                      variant="outlined"
+                      variant="contained"
+                      size="small"
                       onClick={() => handleSchedule(station)}
+                      startIcon={<BookOnline />}
                     >
                       Schedule
                     </Button>
@@ -397,36 +444,37 @@ const Appointments = () => {
                   flexDirection: 'column',
                   transition: 'all 0.3s ease',
                   '&:hover': {
-                    transform: 'translateY(-2px)',
-                    boxShadow: 3,
+                    transform: 'translateY(-4px)',
+                    boxShadow: 6,
                   }
                 }}
               >
-                <CardContent sx={{ flex: 1 }}>
+                <CardContent sx={{ flex: 1, p: 3 }}>
                   <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography variant="h6" gutterBottom>
+                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
                       {appointment.service_station_name}
                     </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       {getStatusIcon(appointment.status)}
                       <Chip
                         label={appointment.status}
                         color={getStatusColor(appointment.status)}
                         size="small"
                         variant="outlined"
+                        sx={{ fontWeight: 500 }}
                       />
                     </Box>
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Business sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                    <Business sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} />
                     <Typography variant="body2" color="text.secondary">
                       {appointment.service_type_name}
                     </Typography>
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <CalendarToday sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                    <Event sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} />
                     <Typography variant="body2" color="text.secondary">
                       {formatDateTime(appointment.appointment_date, appointment.appointment_time)}
                     </Typography>
@@ -434,7 +482,7 @@ const Appointments = () => {
 
                   {appointment.user_name && (
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Person sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                      <Person sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} />
                       <Typography variant="body2" color="text.secondary">
                         {appointment.user_name}
                       </Typography>
@@ -443,14 +491,14 @@ const Appointments = () => {
 
                   {appointment.notes && (
                     <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
-                      <Notes sx={{ fontSize: 16, mr: 1, color: 'text.secondary', mt: 0.2 }} />
+                      <Notes sx={{ fontSize: 18, mr: 1, color: 'primary.main', mt: 0.2 }} />
                       <Typography variant="body2" color="text.secondary">
                         {appointment.notes}
                       </Typography>
                     </Box>
                   )}
 
-                  <Divider sx={{ my: 1 }} />
+                  <Divider sx={{ my: 2 }} />
                   
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <Typography variant="caption" color="text.secondary">
@@ -462,13 +510,20 @@ const Appointments = () => {
                   </Box>
                 </CardContent>
 
-                <CardActions sx={{ justifyContent: 'space-between', p: 2 }}>
+                <CardActions sx={{ justifyContent: 'space-between', p: 2, pt: 0 }}>
                   <Box sx={{ display: 'flex', gap: 1 }}>
                     <Tooltip title="Edit Appointment">
                       <IconButton
                         size="small"
                         color="primary"
                         onClick={() => handleEdit(appointment)}
+                        sx={{
+                          backgroundColor: 'primary.light',
+                          color: 'white',
+                          '&:hover': {
+                            backgroundColor: 'primary.dark',
+                          }
+                        }}
                       >
                         <Edit />
                       </IconButton>
@@ -478,6 +533,13 @@ const Appointments = () => {
                         size="small"
                         color="error"
                         onClick={() => handleDelete(appointment.id)}
+                        sx={{
+                          backgroundColor: 'error.light',
+                          color: 'white',
+                          '&:hover': {
+                            backgroundColor: 'error.dark',
+                          }
+                        }}
                       >
                         <Delete />
                       </IconButton>
@@ -493,6 +555,13 @@ const Appointments = () => {
                           const url = `https://www.google.com/maps/dir/?api=1&destination=${appointment.service_station_latitude},${appointment.service_station_longitude}`;
                           window.open(url, '_blank');
                         }}
+                        sx={{
+                          backgroundColor: 'secondary.light',
+                          color: 'white',
+                          '&:hover': {
+                            backgroundColor: 'secondary.dark',
+                          }
+                        }}
                       >
                         <Directions />
                       </IconButton>
@@ -503,6 +572,21 @@ const Appointments = () => {
             </Grid>
           ))}
         </Grid>
+
+        {/* Floating Action Button for quick booking */}
+        <Fab
+          color="primary"
+          aria-label="book appointment"
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            right: 16,
+            zIndex: 1000,
+          }}
+          onClick={() => setOpenDialog(true)}
+        >
+          <BookOnline />
+        </Fab>
 
         {/* Add/Edit Dialog */}
         <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="md" fullWidth>
@@ -604,18 +688,32 @@ const Appointments = () => {
                     }
                     multiline
                     rows={3}
+                    placeholder="Any special requirements or notes..."
                   />
                 </Grid>
               </Grid>
             </DialogContent>
             <DialogActions>
               <Button onClick={handleDialogClose}>Cancel</Button>
-              <Button type="submit" variant="contained">
-                {editingAppointment ? 'Update' : 'Book'}
+              <Button 
+                type="submit" 
+                variant="contained"
+                disabled={loading}
+                startIcon={loading ? <CircularProgress size={20} /> : null}
+              >
+                {loading ? "Processing..." : (editingAppointment ? 'Update' : 'Book')}
               </Button>
             </DialogActions>
           </Box>
         </Dialog>
+
+        {/* Snackbar for feedback */}
+        <Snackbar
+          open={snackbarOpen}
+          autoHideDuration={4000}
+          onClose={handleSnackbarClose}
+          message={snackbarMessage}
+        />
       </Box>
     </Container>
   );
