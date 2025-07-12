@@ -19,14 +19,30 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  Alert
+  Alert,
+  CardActionArea,
+  IconButton,
+  Tooltip
 } from '@mui/material';
-import { Add, Edit, Delete, LocationOn, Phone, Email } from '@mui/icons-material';
+import { 
+  Add, 
+  Edit, 
+  Delete, 
+  LocationOn, 
+  Phone, 
+  Email, 
+  BookOnline,
+  Schedule,
+  Star,
+  Directions
+} from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 import api from '../utils/api.js';
 
 const ServiceStations = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stations, setStations] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
@@ -132,6 +148,28 @@ const ServiceStations = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const handleBookAppointment = (station) => {
+    // Navigate to appointments page with station pre-selected
+    navigate('/appointments', { 
+      state: { 
+        selectedStation: station,
+        fromServiceStations: true 
+      } 
+    });
+  };
+
+  const handleGetDirections = (station) => {
+    const { latitude, longitude } = station;
+    if (latitude && longitude) {
+      const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}`;
+      window.open(url, '_blank');
+    } else {
+      // Fallback to address search
+      const url = `https://www.google.com/maps/search/${encodeURIComponent(station.address)}`;
+      window.open(url, '_blank');
+    }
+  };
+
   return (
     <Container component="main" maxWidth="lg">
       <Box sx={{ marginTop: 4, marginBottom: 4 }}>
@@ -163,59 +201,123 @@ const ServiceStations = () => {
         <Grid container spacing={3}>
           {stations.map((station) => (
             <Grid item xs={12} md={6} lg={4} key={station.id}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    {station.name}
-                  </Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <LocationOn sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {station.address}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Phone sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {station.phone}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Email sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {station.email}
-                    </Typography>
-                  </Box>
-                  <Box sx={{ mb: 2 }}>
-                    {station.services_offered.map((service) => (
-                      <Chip
-                        key={service.id}
-                        label={service.name}
+              <Card 
+                sx={{ 
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: 4,
+                  }
+                }}
+              >
+                <CardActionArea 
+                  onClick={() => handleBookAppointment(station)}
+                  sx={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}
+                >
+                  <CardContent sx={{ flex: 1 }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+                      <Typography variant="h6" gutterBottom>
+                        {station.name}
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 0.5 }}>
+                        <Star sx={{ fontSize: 16, color: 'warning.main' }} />
+                        <Star sx={{ fontSize: 16, color: 'warning.main' }} />
+                        <Star sx={{ fontSize: 16, color: 'warning.main' }} />
+                        <Star sx={{ fontSize: 16, color: 'warning.main' }} />
+                        <Star sx={{ fontSize: 16, color: 'grey.300' }} />
+                      </Box>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <LocationOn sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                      <Typography variant="body2" color="text.secondary">
+                        {station.address}
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                      <Phone sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                      <Typography variant="body2" color="text.secondary">
+                        {station.phone}
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                      <Email sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                      <Typography variant="body2" color="text.secondary">
+                        {station.email}
+                      </Typography>
+                    </Box>
+                    
+                    <Box sx={{ mb: 2 }}>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        Services Offered:
+                      </Typography>
+                      {station.services_offered.map((service) => (
+                        <Chip
+                          key={service.id}
+                          label={service.name}
+                          size="small"
+                          sx={{ mr: 0.5, mb: 0.5 }}
+                        />
+                      ))}
+                    </Box>
+                  </CardContent>
+                </CardActionArea>
+                
+                <CardActions sx={{ justifyContent: 'space-between', p: 2 }}>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Tooltip title="Book Appointment">
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleBookAppointment(station)}
                         size="small"
-                        sx={{ mr: 0.5, mb: 0.5 }}
-                      />
-                    ))}
+                      >
+                        <BookOnline />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Get Directions">
+                      <IconButton
+                        color="secondary"
+                        onClick={() => handleGetDirections(station)}
+                        size="small"
+                      >
+                        <Directions />
+                      </IconButton>
+                    </Tooltip>
                   </Box>
-                </CardContent>
-                {(user?.role === 'admin' || (user?.role === 'stations' && station.owner === user.id)) && (
-                  <CardActions>
-                    <Button
-                      size="small"
-                      startIcon={<Edit />}
-                      onClick={() => handleEdit(station)}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      size="small"
-                      color="error"
-                      startIcon={<Delete />}
-                      onClick={() => handleDelete(station.id)}
-                    >
-                      Delete
-                    </Button>
-                  </CardActions>
-                )}
+                  
+                  {(user?.role === 'admin' || (user?.role === 'stations' && station.owner === user.id)) && (
+                    <Box sx={{ display: 'flex', gap: 0.5 }}>
+                      <Tooltip title="Edit Station">
+                        <IconButton
+                          size="small"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEdit(station);
+                          }}
+                        >
+                          <Edit />
+                        </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Delete Station">
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDelete(station.id);
+                          }}
+                        >
+                          <Delete />
+                        </IconButton>
+                      </Tooltip>
+                    </Box>
+                  )}
+                </CardActions>
               </Card>
             </Grid>
           ))}

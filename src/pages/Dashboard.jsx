@@ -5,14 +5,26 @@ import {
   Typography,
   Button,
   Box,
-  Chip
+  Chip,
+  Grid,
+  Card,
+  CardContent,
+  CardActionArea
 } from '@mui/material';
-import { Logout, Dashboard as DashboardIcon } from '@mui/icons-material';
+import { 
+  Logout, 
+  Dashboard as DashboardIcon,
+  Business,
+  Schedule,
+  Person,
+  Settings,
+  TrendingUp
+} from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
-  const { token, logout } = useAuth();
+  const { user, token } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -20,36 +32,121 @@ const Dashboard = () => {
     navigate('/signin');
   };
 
+  const dashboardCards = [
+    {
+      title: 'Service Stations',
+      description: 'Browse and manage service stations',
+      icon: <Business sx={{ fontSize: 40, color: 'primary.main' }} />,
+      color: 'primary',
+      path: '/service-stations'
+    },
+    {
+      title: 'Appointments',
+      description: 'View and manage your appointments',
+      icon: <Schedule sx={{ fontSize: 40, color: 'secondary.main' }} />,
+      color: 'secondary',
+      path: '/appointments'
+    },
+    {
+      title: 'Profile',
+      description: 'Manage your account settings',
+      icon: <Person sx={{ fontSize: 40, color: 'info.main' }} />,
+      color: 'info',
+      path: '/profile'
+    },
+    {
+      title: 'Analytics',
+      description: 'View service statistics and reports',
+      icon: <TrendingUp sx={{ fontSize: 40, color: 'success.main' }} />,
+      color: 'success',
+      path: '/analytics'
+    }
+  ];
+
   return (
-    <Container component="main" maxWidth="md">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper elevation={3} sx={{ padding: 4, width: '100%' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
-            <DashboardIcon sx={{ fontSize: 40, color: 'primary.main', mb: 1 }} />
-            <Typography component="h1" variant="h4">
-              Dashboard
-            </Typography>
-          </Box>
+    <Container component="main" maxWidth="lg">
+      <Box sx={{ marginTop: 4, marginBottom: 4 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 4 }}>
+          <DashboardIcon sx={{ fontSize: 48, color: 'primary.main', mb: 2 }} />
+          <Typography component="h1" variant="h4" gutterBottom>
+            Welcome back, {user?.username || 'User'}!
+          </Typography>
+          <Typography variant="body1" color="text.secondary" textAlign="center">
+            Manage your car services and appointments from one place
+          </Typography>
+        </Box>
 
-          <Box sx={{ mb: 3 }}>
+        <Grid container spacing={3}>
+          {dashboardCards.map((card, index) => (
+            <Grid item xs={12} sm={6} md={3} key={index}>
+              <Card 
+                sx={{ 
+                  height: '100%',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-4px)',
+                    boxShadow: 4,
+                  }
+                }}
+              >
+                <CardActionArea 
+                  onClick={() => navigate(card.path)}
+                  sx={{ height: '100%', p: 3, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
+                >
+                  <Box sx={{ mb: 2 }}>
+                    {card.icon}
+                  </Box>
+                  <Typography variant="h6" gutterBottom textAlign="center">
+                    {card.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" textAlign="center">
+                    {card.description}
+                  </Typography>
+                </CardActionArea>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        <Box sx={{ mt: 4, p: 3, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1 }}>
+          <Typography variant="h6" gutterBottom>
+            Quick Actions
+          </Typography>
+          <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 2 }}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<Business />}
+              onClick={() => navigate('/service-stations')}
+            >
+              Browse Stations
+            </Button>
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<Schedule />}
+              onClick={() => navigate('/appointments')}
+            >
+              Book Appointment
+            </Button>
+            <Button
+              variant="outlined"
+              color="info"
+              startIcon={<Settings />}
+              onClick={() => navigate('/profile')}
+            >
+              Settings
+            </Button>
+          </Box>
+        </Box>
+
+        {token && (
+          <Box sx={{ mt: 4, p: 3, bgcolor: 'background.paper', borderRadius: 2, boxShadow: 1 }}>
             <Typography variant="h6" gutterBottom>
-              Welcome! You are successfully logged in.
+              Authentication Status
             </Typography>
-            <Typography variant="body1" color="text.secondary" paragraph>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
               Your authentication token is stored and will be automatically included in all API requests.
-            </Typography>
-          </Box>
-
-          <Box sx={{ mb: 3 }}>
-            <Typography variant="subtitle2" gutterBottom>
-              Current Token (first 50 characters):
             </Typography>
             <Chip 
               label={token ? token.substring(0, 50) + '...' : 'No token'} 
@@ -57,32 +154,7 @@ const Dashboard = () => {
               sx={{ wordBreak: 'break-all' }}
             />
           </Box>
-
-          <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
-            <Button
-              variant="contained"
-              color="primary"
-              onClick={() => navigate('/service-stations')}
-            >
-              Service Stations
-            </Button>
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={() => navigate('/appointments')}
-            >
-              Appointments
-            </Button>
-            <Button
-              variant="outlined"
-              color="error"
-              startIcon={<Logout />}
-              onClick={handleLogout}
-            >
-              Logout
-            </Button>
-          </Box>
-        </Paper>
+        )}
       </Box>
     </Container>
   );

@@ -23,17 +23,39 @@ import {
   List,
   ListItem,
   ListItemText,
-  CircularProgress
+  CircularProgress,
+  CardActionArea,
+  IconButton,
+  Tooltip,
+  Divider
 } from '@mui/material';
-import { Add, Edit, Delete, Schedule, Business, Person } from '@mui/icons-material';
+import { 
+  Add, 
+  Edit, 
+  Delete, 
+  Schedule, 
+  Business, 
+  Person,
+  BookOnline,
+  LocationOn,
+  Phone,
+  Email,
+  CalendarToday,
+  AccessTime,
+  Notes,
+  CheckCircle,
+  Pending,
+  Cancel,
+  Directions
+} from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api.js';
-import AuthProvider  from "../context/AuthContext"; // adjust if your context is elsewhere
+import AuthProvider  from "../context/AuthContext";
 import ScheduleForm from './ScheduleForm';
 import {AuthContext} from '../context/AuthContext';
 import axios from "axios";
 import dayjs from "dayjs";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 const fetchNearbyStations = async (lat, lng, radius, token) => {
   const res = await axios.get(
@@ -56,6 +78,8 @@ const fetchServiceTypes = async (token) => {
 
 const Appointments = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [appointments, setAppointments] = useState([]);
   const [serviceStations, setServiceStations] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
@@ -78,13 +102,27 @@ const Appointments = () => {
   const [date, setDate] = useState('');
   const [time, setTime] = useState('');
   const [notes, setNotes] = useState('');
-  const navigate = useNavigate();
+  
+  // Check if we came from ServiceStations with a pre-selected station
+  const preSelectedStation = location.state?.selectedStation;
+  const fromServiceStations = location.state?.fromServiceStations;
 
   useEffect(() => {
     fetchAppointments();
     fetchServiceStations();
     fetchServiceTypes();
-  }, []);
+    
+    // If we have a pre-selected station from ServiceStations, set it up
+    if (preSelectedStation && fromServiceStations) {
+      setSelectedStation(preSelectedStation.id);
+      setForm(prev => ({
+        ...prev,
+        service_station: preSelectedStation.id
+      }));
+      // Clear the location state to prevent re-applying on refresh
+      navigate(location.pathname, { replace: true });
+    }
+  }, [preSelectedStation, fromServiceStations, navigate, location.pathname]);
 
   const fetchAppointments = async () => {
     try {
@@ -220,6 +258,25 @@ const Appointments = () => {
     }
   };
 
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'confirmed': return <CheckCircle />;
+      case 'pending': return <Pending />;
+      case 'in_progress': return <Schedule />;
+      case 'completed': return <CheckCircle />;
+      case 'cancelled': return <Cancel />;
+      default: return <Schedule />;
+    }
+  };
+
+  const formatDateTime = (date, time) => {
+    if (!date) return 'Not scheduled';
+    const dateObj = new Date(date);
+    const formattedDate = dateObj.toLocaleDateString();
+    const formattedTime = time || 'TBD';
+    return `${formattedDate} at ${formattedTime}`;
+  };
+
   const handleSearch = async () => {
     setLoading(true);
     // Replace with user's actual location
@@ -333,30 +390,48 @@ const Appointments = () => {
         <Grid container spacing={3}>
           {appointments.map((appointment) => (
             <Grid item xs={12} md={6} lg={4} key={appointment.id}>
-              <Card>
-                <CardContent>
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+              <Card 
+                sx={{ 
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: 3,
+                  }
+                }}
+              >
+                <CardContent sx={{ flex: 1 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
                     <Typography variant="h6" gutterBottom>
                       {appointment.service_station_name}
                     </Typography>
-                    <Chip
-                      label={appointment.status}
-                      color={getStatusColor(appointment.status)}
-                      size="small"
-                    />
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      {getStatusIcon(appointment.status)}
+                      <Chip
+                        label={appointment.status}
+                        color={getStatusColor(appointment.status)}
+                        size="small"
+                        variant="outlined"
+                      />
+                    </Box>
                   </Box>
+
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <Business sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
                     <Typography variant="body2" color="text.secondary">
                       {appointment.service_type_name}
                     </Typography>
                   </Box>
+
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Schedule sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
+                    <CalendarToday sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
                     <Typography variant="body2" color="text.secondary">
-                      {appointment.appointment_date} at {appointment.appointment_time}
+                      {formatDateTime(appointment.appointment_date, appointment.appointment_time)}
                     </Typography>
                   </Box>
+
                   {appointment.user_name && (
                     <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                       <Person sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
@@ -365,28 +440,64 @@ const Appointments = () => {
                       </Typography>
                     </Box>
                   )}
+
                   {appointment.notes && (
-                    <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                      Notes: {appointment.notes}
-                    </Typography>
+                    <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
+                      <Notes sx={{ fontSize: 16, mr: 1, color: 'text.secondary', mt: 0.2 }} />
+                      <Typography variant="body2" color="text.secondary">
+                        {appointment.notes}
+                      </Typography>
+                    </Box>
                   )}
+
+                  <Divider sx={{ my: 1 }} />
+                  
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="caption" color="text.secondary">
+                      ID: #{appointment.id}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      Created: {new Date(appointment.created_at || Date.now()).toLocaleDateString()}
+                    </Typography>
+                  </Box>
                 </CardContent>
-                <CardActions>
-                  <Button
-                    size="small"
-                    startIcon={<Edit />}
-                    onClick={() => handleEdit(appointment)}
-                  >
-                    Edit
-                  </Button>
-                  <Button
-                    size="small"
-                    color="error"
-                    startIcon={<Delete />}
-                    onClick={() => handleDelete(appointment.id)}
-                  >
-                    Delete
-                  </Button>
+
+                <CardActions sx={{ justifyContent: 'space-between', p: 2 }}>
+                  <Box sx={{ display: 'flex', gap: 1 }}>
+                    <Tooltip title="Edit Appointment">
+                      <IconButton
+                        size="small"
+                        color="primary"
+                        onClick={() => handleEdit(appointment)}
+                      >
+                        <Edit />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Delete Appointment">
+                      <IconButton
+                        size="small"
+                        color="error"
+                        onClick={() => handleDelete(appointment.id)}
+                      >
+                        <Delete />
+                      </IconButton>
+                    </Tooltip>
+                  </Box>
+                  
+                  {appointment.service_station_latitude && appointment.service_station_longitude && (
+                    <Tooltip title="Get Directions">
+                      <IconButton
+                        size="small"
+                        color="secondary"
+                        onClick={() => {
+                          const url = `https://www.google.com/maps/dir/?api=1&destination=${appointment.service_station_latitude},${appointment.service_station_longitude}`;
+                          window.open(url, '_blank');
+                        }}
+                      >
+                        <Directions />
+                      </IconButton>
+                    </Tooltip>
+                  )}
                 </CardActions>
               </Card>
             </Grid>
