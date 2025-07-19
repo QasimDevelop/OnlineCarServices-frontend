@@ -22,10 +22,7 @@ import {
     Typography,
   } from "@mui/material";
   import { useEffect, useRef, useState } from "react";
-  
-  // Dialogflow configuration
-  const DIALOGFLOW_URL = import.meta.env.VITE_DIALOGFLOW_URL;
-  const DIALOGFLOW_TOKEN = import.meta.env.VITE_DIALOGFLOW_TOKEN;
+  import DIALOGFLOW_CONFIG from '../config/dialogflow';
 
   const Chatbot = ({ open, onClose }) => {
     const [messages, setMessages] = useState([
@@ -51,24 +48,10 @@ import {
   
     const sendMessageToDialogflow = async (message) => {
       try {
-        const response = await fetch(DIALOGFLOW_URL, {
+        const response = await fetch(DIALOGFLOW_CONFIG.URL, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json; charset=utf-8",
-            Authorization: `Bearer ${DIALOGFLOW_TOKEN}`,
-          },
-          body: JSON.stringify({
-            queryInput: {
-              text: {
-                text: message,
-                languageCode: "en",
-              },
-            },
-            queryParams: {
-              source: "DIALOGFLOW_CONSOLE",
-              timeZone: "Asia/Karachi",
-            },
-          }),
+          headers: DIALOGFLOW_CONFIG.getHeaders(),
+          body: JSON.stringify(DIALOGFLOW_CONFIG.getRequestBody(message)),
         });
   
         if (!response.ok) {

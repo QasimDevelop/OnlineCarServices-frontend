@@ -52,11 +52,9 @@ import {
   Cancel,
   Directions,
   Event,
-  Clock,
   Star,
   Info,
-  Warning,
-  Success
+  Warning
 } from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api.js';
@@ -284,7 +282,7 @@ const Appointments = () => {
       case 'confirmed': return <CheckCircle />;
       case 'pending': return <Pending />;
       case 'in_progress': return <Schedule />;
-      case 'completed': return <Success />;
+      case 'completed': return <CheckCircle color="success" />;
       case 'cancelled': return <Cancel />;
       default: return <Info />;
     }
