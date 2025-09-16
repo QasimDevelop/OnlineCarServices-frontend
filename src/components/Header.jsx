@@ -1,253 +1,243 @@
-import {
-    Business as BusinessIcon,
-    Chat as ChatIcon,
-    Dashboard as DashboardIcon,
-    Logout as LogoutIcon,
-    Menu as MenuIcon,
-    Person as PersonIcon,
-    Schedule as ScheduleIcon,
-    Home as HomeIcon,
-    Settings as SettingsIcon,
-  } from "@mui/icons-material";
-  import {
-    AppBar,
-    Avatar,
-    Box,
-    Button,
-    Chip,
-    IconButton,
-    Menu,
-    MenuItem,
-    Toolbar,
-    Typography,
-    Divider,
-    Badge,
-  } from "@mui/material";
-  import React from "react";
-  import { useNavigate, useLocation } from "react-router-dom";
-  import { useAuth } from "../context/AuthContext";
-  
-  const Header = ({ onChatbotToggle }) => {
-    const { user, logout } = useAuth();
-    const navigate = useNavigate();
-    const location = useLocation();
-    const [anchorEl, setAnchorEl] = React.useState(null);
-  
-    const handleMenuOpen = (event) => {
-      setAnchorEl(event.currentTarget);
-    };
-  
-    const handleMenuClose = () => {
-      setAnchorEl(null);
-    };
-  
-    const handleLogout = () => {
-      logout();
-      navigate("/signin");
-      handleMenuClose();
-    };
-  
-    const handleNavigation = (path) => {
-      navigate(path);
-      handleMenuClose();
-    };
-  
-    const handleChatbotToggle = () => {
-      if (onChatbotToggle) {
-        onChatbotToggle();
-      }
-    };
+import React from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
-    const isActiveRoute = (path) => {
-      return location.pathname === path;
-    };
-  
-    if (!user) {
-      return null;
+const Header = ({ onChatbotToggle }) => {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleMenuOpen = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+    handleMenuClose();
+  };
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    handleMenuClose();
+  };
+
+  const handleChatbotToggle = () => {
+    if (onChatbotToggle) {
+      onChatbotToggle();
     }
-  
-    return (
-      <AppBar position="static" elevation={1} sx={{ backgroundColor: 'primary.main' }}>
-        <Toolbar sx={{ px: { xs: 1, md: 3 } }}>
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              cursor: 'pointer',
-              '&:hover': { opacity: 0.8 }
-            }}
-            onClick={() => navigate('/dashboard')}
+  };
+
+  const isActiveRoute = (path) => {
+    return location.pathname === path;
+  };
+
+  return (
+    <header className="bg-blue-600 shadow-md">
+      <div className="px-4 md:px-12">
+        <div className="flex items-center justify-between h-16">
+          <div 
+            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={() => navigate('/')}
           >
-            <Typography
-              variant="h6"
-              component="div"
-              sx={{ 
-                fontWeight: "bold",
-                display: 'flex',
-                alignItems: 'center',
-                gap: 1
-              }}
-            >
+            <h1 className="text-xl font-bold text-white flex items-center gap-2">
               🚗 Car Services
-            </Typography>
-          </Box>
-  
+            </h1>
+          </div>
+
           {/* Desktop Navigation */}
-          <Box sx={{ display: { xs: "none", md: "flex" }, gap: 1, ml: 4 }}>
-            <Button
-              color="inherit"
-              startIcon={<DashboardIcon />}
-              onClick={() => navigate("/dashboard")}
-              sx={{
-                backgroundColor: isActiveRoute('/dashboard') ? 'rgba(255,255,255,0.1)' : 'transparent',
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.15)',
-                }
-              }}
+          <nav className="hidden md:flex items-center gap-4 ml-8">
+            <button
+              className={`px-4 py-2 text-white rounded-lg transition-colors flex items-center gap-2 ${
+                isActiveRoute('/') 
+                  ? 'bg-white bg-opacity-20' 
+                  : 'hover:bg-white hover:bg-opacity-15'
+              }`}
+              onClick={() => navigate("/")}
             >
-              Dashboard
-            </Button>
-            <Button
-              color="inherit"
-              startIcon={<BusinessIcon />}
-              onClick={() => navigate("/service-stations")}
-              sx={{
-                backgroundColor: isActiveRoute('/service-stations') ? 'rgba(255,255,255,0.1)' : 'transparent',
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.15)',
-                }
-              }}
-            >
-              Service Stations
-            </Button>
-            <Button
-              color="inherit"
-              startIcon={<ScheduleIcon />}
-              onClick={() => navigate("/appointments")}
-              sx={{
-                backgroundColor: isActiveRoute('/appointments') ? 'rgba(255,255,255,0.1)' : 'transparent',
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.15)',
-                }
-              }}
-            >
-              Appointments
-            </Button>
-            <Button
-              color="inherit"
-              startIcon={<ChatIcon />}
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+              </svg>
+              Home
+            </button>
+            {user && (
+              <>
+                <button
+                  className={`px-4 py-2 text-white rounded-lg transition-colors flex items-center gap-2 ${
+                    isActiveRoute('/dashboard') 
+                      ? 'bg-white bg-opacity-20' 
+                      : 'hover:bg-white hover:bg-opacity-15'
+                  }`}
+                  onClick={() => navigate("/dashboard")}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                  </svg>
+                  Dashboard
+                </button>
+                <button
+                  className={`px-4 py-2 text-white rounded-lg transition-colors flex items-center gap-2 ${
+                    isActiveRoute('/service-stations') 
+                      ? 'bg-white bg-opacity-20' 
+                      : 'hover:bg-white hover:bg-opacity-15'
+                  }`}
+                  onClick={() => navigate("/service-stations")}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" clipRule="evenodd" />
+                  </svg>
+                  Service Stations
+                </button>
+                <button
+                  className={`px-4 py-2 text-white rounded-lg transition-colors flex items-center gap-2 ${
+                    isActiveRoute('/appointments') 
+                      ? 'bg-white bg-opacity-20' 
+                      : 'hover:bg-white hover:bg-opacity-15'
+                  }`}
+                  onClick={() => navigate("/appointments")}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                  </svg>
+                  Appointments
+                </button>
+              </>
+            )}
+            <button
+              className="px-4 py-2 text-white rounded-lg transition-colors flex items-center gap-2 hover:bg-white hover:bg-opacity-15"
               onClick={handleChatbotToggle}
-              sx={{
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.15)',
-                }
-              }}
             >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+              </svg>
               Chat Support
-            </Button>
-          </Box>
-  
-          {/* User Menu */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, ml: "auto" }}>
-            <Chip
-              label={user.role || "User"}
-              size="small"
-              color="secondary"
-              variant="outlined"
-              sx={{ 
-                backgroundColor: 'rgba(255,255,255,0.1)',
-                borderColor: 'rgba(255,255,255,0.3)',
-                color: 'white',
-                '& .MuiChip-label': {
-                  color: 'white',
-                }
-              }}
-            />
-            <IconButton 
-              color="inherit" 
-              onClick={handleMenuOpen} 
-              sx={{ 
-                ml: 1,
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                }
-              }}
-            >
-              <Badge
-                overlap="circular"
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                badgeContent={
-                  <Box
-                    sx={{
-                      width: 8,
-                      height: 8,
-                      borderRadius: '50%',
-                      backgroundColor: 'success.main',
-                      border: '2px solid white',
-                    }}
-                  />
-                }
-              >
-                <Avatar sx={{ width: 32, height: 32, bgcolor: "secondary.main" }}>
-                  <PersonIcon />
-                </Avatar>
-              </Badge>
-            </IconButton>
-          </Box>
-  
+            </button>
+          </nav>
+
+          {/* User Menu / Auth Buttons */}
+          <div className="flex items-center gap-4 ml-auto">
+            {user ? (
+              <>
+                <span className="px-3 py-1 text-sm bg-white bg-opacity-20 border border-white border-opacity-30 text-white rounded-full">
+                  {user.role || "User"}
+                </span>
+                <button 
+                  className="ml-2 p-1 text-white rounded-full hover:bg-white hover:bg-opacity-20 transition-colors relative"
+                  onClick={handleMenuOpen} 
+                >
+                  <div className="w-8 h-8 bg-pink-600 rounded-full flex items-center justify-center">
+                    <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                </button>
+              </>
+            ) : (
+              <div className="flex gap-2">
+                <button
+                  className="px-4 py-2 text-white border border-white border-opacity-30 rounded-lg hover:border-white hover:bg-white hover:bg-opacity-20 transition-colors"
+                  onClick={() => navigate("/signin")}
+                >
+                  Sign In
+                </button>
+                <button
+                  className="px-4 py-2 bg-white text-blue-600 rounded-lg hover:bg-gray-100 transition-colors"
+                  onClick={() => navigate("/signup")}
+                >
+                  Sign Up
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* Mobile Menu Button */}
-          <IconButton
-            color="inherit"
-            sx={{ 
-              display: { xs: "flex", md: "none" },
-              ml: 1,
-              '&:hover': {
-                backgroundColor: 'rgba(255,255,255,0.1)',
-              }
-            }}
+          <button
+            className="md:hidden p-2 text-white rounded-lg hover:bg-white hover:bg-opacity-20 transition-colors"
             onClick={handleMenuOpen}
           >
-            <MenuIcon />
-          </IconButton>
-  
-          {/* Mobile Menu */}
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            sx={{ 
-              display: { xs: "block", md: "none" },
-              '& .MuiPaper-root': {
-                minWidth: 200,
-                mt: 1,
-              }
-            }}
-          >
-            <MenuItem onClick={() => handleNavigation("/dashboard")}>
-              <DashboardIcon sx={{ mr: 2, color: isActiveRoute('/dashboard') ? 'primary.main' : 'inherit' }} />
-              Dashboard
-            </MenuItem>
-            <MenuItem onClick={() => handleNavigation("/service-stations")}>
-              <BusinessIcon sx={{ mr: 2, color: isActiveRoute('/service-stations') ? 'primary.main' : 'inherit' }} />
-              Service Stations
-            </MenuItem>
-            <MenuItem onClick={() => handleNavigation("/appointments")}>
-              <ScheduleIcon sx={{ mr: 2, color: isActiveRoute('/appointments') ? 'primary.main' : 'inherit' }} />
-              Appointments
-            </MenuItem>
-            <MenuItem onClick={handleChatbotToggle}>
-              <ChatIcon sx={{ mr: 2 }} />
+            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Mobile Menu */}
+        {anchorEl && (
+          <div className="md:hidden bg-white shadow-lg rounded-lg mt-2 p-4 min-w-[200px]">
+            <button 
+              className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-3"
+              onClick={() => handleNavigation("/")}
+            >
+              <svg className={`w-5 h-5 ${isActiveRoute('/') ? 'text-blue-600' : 'text-gray-600'}`} fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+              </svg>
+              Home
+            </button>
+            {user && (
+              <>
+                <button 
+                  className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-3"
+                  onClick={() => handleNavigation("/dashboard")}
+                >
+                  <svg className={`w-5 h-5 ${isActiveRoute('/dashboard') ? 'text-blue-600' : 'text-gray-600'}`} fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z" />
+                  </svg>
+                  Dashboard
+                </button>
+                <button 
+                  className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-3"
+                  onClick={() => handleNavigation("/service-stations")}
+                >
+                  <svg className={`w-5 h-5 ${isActiveRoute('/service-stations') ? 'text-blue-600' : 'text-gray-600'}`} fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" clipRule="evenodd" />
+                  </svg>
+                  Service Stations
+                </button>
+                <button 
+                  className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-3"
+                  onClick={() => handleNavigation("/appointments")}
+                >
+                  <svg className={`w-5 h-5 ${isActiveRoute('/appointments') ? 'text-blue-600' : 'text-gray-600'}`} fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                  </svg>
+                  Appointments
+                </button>
+              </>
+            )}
+            <button 
+              className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-3"
+              onClick={handleChatbotToggle}
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M18 10c0 3.866-3.582 7-8 7a8.841 8.841 0 01-4.083-.98L2 17l1.338-3.123C2.493 12.767 2 11.434 2 10c0-3.866 3.582-7 8-7s8 3.134 8 7zM7 9H5v2h2V9zm8 0h-2v2h2V9zM9 9h2v2H9V9z" clipRule="evenodd" />
+              </svg>
               Chat Support
-            </MenuItem>
-            <Divider />
-            <MenuItem onClick={handleLogout}>
-              <LogoutIcon sx={{ mr: 2 }} />
-              Logout
-            </MenuItem>
-          </Menu>
-        </Toolbar>
-      </AppBar>
-    );
-  };
-  
-  export default Header;
+            </button>
+            {user && (
+              <>
+                <hr className="my-2" />
+                <button 
+                  className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-3"
+                  onClick={handleLogout}
+                >
+                  <svg className="w-5 h-5 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-2.293 2.293z" clipRule="evenodd" />
+                  </svg>
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </header>
+  );
+};
+
+export default Header;

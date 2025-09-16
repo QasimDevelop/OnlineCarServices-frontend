@@ -1,64 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
-import {
-  Container,
-  Paper,
-  Typography,
-  Button,
-  Box,
-  Grid,
-  Card,
-  CardContent,
-  CardActions,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Alert,
-  List,
-  ListItem,
-  ListItemText,
-  CircularProgress,
-  CardActionArea,
-  IconButton,
-  Tooltip,
-  Divider,
-  Rating,
-  Fab,
-  Snackbar,
-  LinearProgress
-} from '@mui/material';
-import { 
-  Add, 
-  Edit, 
-  Delete, 
-  Schedule, 
-  Business, 
-  Person,
-  BookOnline,
-  LocationOn,
-  Phone,
-  Email,
-  CalendarToday,
-  AccessTime,
-  Notes,
-  CheckCircle,
-  Pending,
-  Cancel,
-  Directions,
-  Event,
-  Star,
-  Info,
-  Warning
-} from '@mui/icons-material';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api.js';
-import AuthProvider  from "../context/AuthContext";
+import AuthProvider from "../context/AuthContext";
 import ScheduleForm from './ScheduleForm';
 import {AuthContext} from '../context/AuthContext';
 import axios from "axios";
@@ -268,23 +211,47 @@ const Appointments = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'confirmed': return 'success';
-      case 'pending': return 'warning';
-      case 'in_progress': return 'info';
-      case 'completed': return 'success';
-      case 'cancelled': return 'error';
-      default: return 'default';
+      case 'confirmed': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'in_progress': return 'bg-blue-100 text-blue-800';
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'cancelled': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case 'confirmed': return <CheckCircle />;
-      case 'pending': return <Pending />;
-      case 'in_progress': return <Schedule />;
-      case 'completed': return <CheckCircle color="success" />;
-      case 'cancelled': return <Cancel />;
-      default: return <Info />;
+      case 'confirmed': return (
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+        </svg>
+      );
+      case 'pending': return (
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+        </svg>
+      );
+      case 'in_progress': return (
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+        </svg>
+      );
+      case 'completed': return (
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+        </svg>
+      );
+      case 'cancelled': return (
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+        </svg>
+      );
+      default: return (
+        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+        </svg>
+      );
     }
   };
 
@@ -345,375 +312,378 @@ const Appointments = () => {
 
   if (isLoading) {
     return (
-      <Container component="main" maxWidth="lg">
-        <Box sx={{ marginTop: 4, marginBottom: 4 }}>
-          <LinearProgress />
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-            <CircularProgress />
-          </Box>
-        </Box>
-      </Container>
+      <div className="min-h-screen bg-gray-50 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-8">
+            <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+              <div className="bg-blue-600 h-2 rounded-full animate-pulse"></div>
+            </div>
+            <div className="flex justify-center items-center h-48">
+              <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Container component="main" maxWidth="lg">
-      <Box sx={{ marginTop: 4, marginBottom: 4 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-          <Box>
-            <Typography component="h1" variant="h4" gutterBottom>
-              Appointments
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Manage your car service appointments and bookings
-            </Typography>
-          </Box>
-          {user?.role === 'user' && (
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => {
-                setEditingAppointment(null);
-                resetForm();
-                setOpenDialog(true);
-              }}
-              sx={{ borderRadius: 2 }}
-            >
-              Book Appointment
-            </Button>
-          )}
-        </Box>
-
-        {message && (
-          <Alert severity={severity} sx={{ mb: 2 }}>
-            {message}
-          </Alert>
-        )}
-
-        <div>
-          <Button
-            variant="outlined"
-            color="primary"
-            onClick={handleSearch}
-            disabled={loading}
-            sx={{ mb: 2 }}
-            startIcon={loading ? <CircularProgress size={20} /> : <LocationOn />}
-          >
-            {loading ? "Searching..." : "Find Nearby Stations"}
-          </Button>
-          <Paper elevation={2} sx={{ mb: 3 }}>
-            <List>
-              {stations.map(station => (
-                <ListItem
-                  key={station.id}
-                  secondaryAction={
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => handleSchedule(station)}
-                      startIcon={<BookOnline />}
-                    >
-                      Schedule
-                    </Button>
-                  }
-                >
-                  <ListItemText
-                    primary={station.name}
-                    secondary={station.address}
-                  />
-                </ListItem>
-              ))}
-            </List>
-            {stations.length === 0 && !loading && (
-              <Box p={2}>
-                <Typography>No stations found within 10 km offering Oil changing.</Typography>
-              </Box>
+    <div className="min-h-screen bg-gray-50 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900">
+                Appointments
+              </h1>
+              <p className="text-lg text-gray-600 mt-2">
+                Manage your car service appointments and bookings
+              </p>
+            </div>
+            {user?.role === 'user' && (
+              <button
+                onClick={() => {
+                  setEditingAppointment(null);
+                  resetForm();
+                  setOpenDialog(true);
+                }}
+                className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+                Book Appointment
+              </button>
             )}
-          </Paper>
+          </div>
+
+          {message && (
+            <div className={`p-4 rounded-lg mb-6 ${
+              severity === 'success' 
+                ? 'bg-green-100 border border-green-400 text-green-700' 
+                : 'bg-red-100 border border-red-400 text-red-700'
+            }`}>
+              {message}
+            </div>
+          )}
         </div>
 
-        <Grid container spacing={3}>
+        <div className="mb-6">
+          <button
+            onClick={handleSearch}
+            disabled={loading}
+            className="px-4 py-2 border border-blue-600 text-blue-600 rounded-lg hover:bg-blue-50 transition-colors flex items-center gap-2 mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? (
+              <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+              </svg>
+            )}
+            {loading ? "Searching..." : "Find Nearby Stations"}
+          </button>
+          
+          <div className="bg-white rounded-lg shadow-md p-4 mb-6">
+            <div className="space-y-2">
+              {stations.map(station => (
+                <div key={station.id} className="flex items-center justify-between p-3 border border-gray-200 rounded-lg">
+                  <div>
+                    <h4 className="font-medium text-gray-900">{station.name}</h4>
+                    <p className="text-sm text-gray-600">{station.address}</p>
+                  </div>
+                  <button
+                    onClick={() => handleSchedule(station)}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm flex items-center gap-2"
+                  >
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                    </svg>
+                    Schedule
+                  </button>
+                </div>
+              ))}
+            </div>
+            {stations.length === 0 && !loading && (
+              <div className="p-4 text-center text-gray-600">
+                No stations found within 10 km offering Oil changing.
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {appointments.map((appointment) => (
-            <Grid item xs={12} md={6} lg={4} key={appointment.id}>
-              <Card 
-                sx={{ 
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  transition: 'all 0.3s ease',
-                  '&:hover': {
-                    transform: 'translateY(-4px)',
-                    boxShadow: 6,
-                  }
-                }}
-              >
-                <CardContent sx={{ flex: 1, p: 3 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-                    <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-                      {appointment.service_station_name}
-                    </Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {getStatusIcon(appointment.status)}
-                      <Chip
-                        label={appointment.status}
-                        color={getStatusColor(appointment.status)}
-                        size="small"
-                        variant="outlined"
-                        sx={{ fontWeight: 500 }}
-                      />
-                    </Box>
-                  </Box>
+            <div key={appointment.id} className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 transform hover:-translate-y-1">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    {appointment.service_station_name}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    {getStatusIcon(appointment.status)}
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(appointment.status)}`}>
+                      {appointment.status}
+                    </span>
+                  </div>
+                </div>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Business sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {appointment.service_type_name}
-                    </Typography>
-                  </Box>
+                <div className="space-y-2 mb-4">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" clipRule="evenodd" />
+                    </svg>
+                    {appointment.service_type_name}
+                  </div>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <Event sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} />
-                    <Typography variant="body2" color="text.secondary">
-                      {formatDateTime(appointment.appointment_date, appointment.appointment_time)}
-                    </Typography>
-                  </Box>
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                    </svg>
+                    {formatDateTime(appointment.appointment_date, appointment.appointment_time)}
+                  </div>
 
                   {appointment.user_name && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Person sx={{ fontSize: 18, mr: 1, color: 'primary.main' }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {appointment.user_name}
-                      </Typography>
-                    </Box>
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                      </svg>
+                      {appointment.user_name}
+                    </div>
                   )}
 
                   {appointment.notes && (
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1 }}>
-                      <Notes sx={{ fontSize: 18, mr: 1, color: 'primary.main', mt: 0.2 }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {appointment.notes}
-                      </Typography>
-                    </Box>
+                    <div className="flex items-start gap-2 text-sm text-gray-600">
+                      <svg className="w-4 h-4 text-blue-600 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      {appointment.notes}
+                    </div>
                   )}
+                </div>
 
-                  <Divider sx={{ my: 2 }} />
-                  
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Typography variant="caption" color="text.secondary">
-                      ID: #{appointment.id}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      Created: {new Date(appointment.created_at || Date.now()).toLocaleDateString()}
-                    </Typography>
-                  </Box>
-                </CardContent>
+                <hr className="my-4 border-gray-200" />
+                
+                <div className="flex justify-between items-center text-xs text-gray-500 mb-4">
+                  <span>ID: #{appointment.id}</span>
+                  <span>Created: {new Date(appointment.created_at || Date.now()).toLocaleDateString()}</span>
+                </div>
 
-                <CardActions sx={{ justifyContent: 'space-between', p: 2, pt: 0 }}>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Tooltip title="Edit Appointment">
-                      <IconButton
-                        size="small"
-                        color="primary"
-                        onClick={() => handleEdit(appointment)}
-                        sx={{
-                          backgroundColor: 'primary.light',
-                          color: 'white',
-                          '&:hover': {
-                            backgroundColor: 'primary.dark',
-                          }
-                        }}
-                      >
-                        <Edit />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Delete Appointment">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => handleDelete(appointment.id)}
-                        sx={{
-                          backgroundColor: 'error.light',
-                          color: 'white',
-                          '&:hover': {
-                            backgroundColor: 'error.dark',
-                          }
-                        }}
-                      >
-                        <Delete />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                  
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(appointment)}
+                    className="flex-1 px-3 py-2 text-blue-600 border border-blue-600 rounded-lg hover:bg-blue-50 transition-colors text-sm"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(appointment.id)}
+                    className="flex-1 px-3 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm"
+                  >
+                    Cancel
+                  </button>
                   {appointment.service_station_latitude && appointment.service_station_longitude && (
-                    <Tooltip title="Get Directions">
-                      <IconButton
-                        size="small"
-                        color="secondary"
-                        onClick={() => {
-                          const url = `https://www.google.com/maps/dir/?api=1&destination=${appointment.service_station_latitude},${appointment.service_station_longitude}`;
-                          window.open(url, '_blank');
-                        }}
-                        sx={{
-                          backgroundColor: 'secondary.light',
-                          color: 'white',
-                          '&:hover': {
-                            backgroundColor: 'secondary.dark',
-                          }
-                        }}
-                      >
-                        <Directions />
-                      </IconButton>
-                    </Tooltip>
+                    <button
+                      onClick={() => {
+                        const url = `https://www.google.com/maps/dir/?api=1&destination=${appointment.service_station_latitude},${appointment.service_station_longitude}`;
+                        window.open(url, '_blank');
+                      }}
+                      className="px-3 py-2 text-purple-600 border border-purple-600 rounded-lg hover:bg-purple-50 transition-colors text-sm"
+                      title="Get Directions"
+                    >
+                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                      </svg>
+                    </button>
                   )}
-                </CardActions>
-              </Card>
-            </Grid>
+                </div>
+              </div>
+            </div>
           ))}
-        </Grid>
+        </div>
 
         {/* Floating Action Button for quick booking */}
-        <Fab
-          color="primary"
-          aria-label="book appointment"
-          sx={{
-            position: 'fixed',
-            bottom: 16,
-            right: 16,
-            zIndex: 1000,
-          }}
+        <button
+          className="fixed bottom-4 right-4 w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 transition-colors z-50 flex items-center justify-center"
           onClick={() => setOpenDialog(true)}
+          aria-label="book appointment"
         >
-          <BookOnline />
-        </Fab>
+          <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+          </svg>
+        </button>
 
         {/* Add/Edit Dialog */}
-        <Dialog open={openDialog} onClose={handleDialogClose} maxWidth="md" fullWidth>
-          <DialogTitle>
-            {editingAppointment ? 'Edit Appointment' : 'Book Appointment'}
-          </DialogTitle>
-          <Box component="form" onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
-            <DialogContent>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <FormControl fullWidth>
-                    <InputLabel>Service Station</InputLabel>
-                    <Select
-                      name="service_station"
-                      value={editingAppointment ? form.service_station : selectedStation}
-                      onChange={editingAppointment
-                        ? (e) => setForm({ ...form, service_station: e.target.value })
-                        : (e) => setSelectedStation(e.target.value)
-                      }
-                      label="Service Station"
-                      required
-                    >
-                      {serviceStations.map((station) => (
-                        <MenuItem key={station.id} value={station.id}>
-                          {station.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={12}>
-                  <FormControl fullWidth>
-                    <InputLabel>Service Type</InputLabel>
-                    <Select
-                      name="service_type"
-                      value={editingAppointment ? form.service_type : selectedService}
-                      onChange={editingAppointment
-                        ? (e) => setForm({ ...form, service_type: e.target.value })
-                        : (e) => setSelectedService(e.target.value)
-                      }
-                      label="Service Type"
-                      required
-                      disabled={
-                        editingAppointment
-                          ? !form.service_station
-                          : !selectedStation
-                      }
-                    >
-                      {(editingAppointment
-                        ? serviceStations.find(s => s.id === form.service_station)
-                        : serviceStations.find(s => s.id === selectedStation)
-                      )?.services_offered.map(service => (
-                        <MenuItem key={service.id} value={service.id}>
-                          {service.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    fullWidth
-                    label="Date"
-                    name="appointment_date"
-                    value={editingAppointment ? form.appointment_date : date}
+        {openDialog && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {editingAppointment ? 'Edit Appointment' : 'Book Appointment'}
+                </h2>
+                <button
+                  onClick={handleDialogClose}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Service Station
+                  </label>
+                  <select
+                    name="service_station"
+                    value={editingAppointment ? form.service_station : selectedStation}
                     onChange={editingAppointment
-                      ? (e) => setForm({ ...form, appointment_date: e.target.value })
-                      : (e) => setDate(e.target.value)
+                      ? (e) => setForm({ ...form, service_station: e.target.value })
+                      : (e) => setSelectedStation(e.target.value)
                     }
-                    type="date"
                     required
-                    InputLabelProps={{ shrink: true }}
-                    inputProps={{ min: minDate }}
-                  />
-                </Grid>
-                <Grid item xs={6}>
-                  <TextField
-                    label="Time"
-                    type="time"
-                    value={editingAppointment ? form.appointment_time : time}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="">Select a service station</option>
+                    {serviceStations.map((station) => (
+                      <option key={station.id} value={station.id}>
+                        {station.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Service Type
+                  </label>
+                  <select
+                    name="service_type"
+                    value={editingAppointment ? form.service_type : selectedService}
                     onChange={editingAppointment
-                      ? (e) => setForm({ ...form, appointment_time: e.target.value })
-                      : (e) => setTime(e.target.value)
+                      ? (e) => setForm({ ...form, service_type: e.target.value })
+                      : (e) => setSelectedService(e.target.value)
                     }
-                    InputLabelProps={{ shrink: true }}
                     required
-                    fullWidth
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    label="Notes"
+                    disabled={
+                      editingAppointment
+                        ? !form.service_station
+                        : !selectedStation
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50"
+                  >
+                    <option value="">Select a service</option>
+                    {(editingAppointment
+                      ? serviceStations.find(s => s.id === form.service_station)
+                      : serviceStations.find(s => s.id === selectedStation)
+                    )?.services_offered?.map(service => (
+                      <option key={service.id} value={service.id}>
+                        {service.name}
+                      </option>
+                    )) || []}
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Date
+                    </label>
+                    <input
+                      type="date"
+                      name="appointment_date"
+                      value={editingAppointment ? form.appointment_date : date}
+                      onChange={editingAppointment
+                        ? (e) => setForm({ ...form, appointment_date: e.target.value })
+                        : (e) => setDate(e.target.value)
+                      }
+                      required
+                      min={minDate}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Time
+                    </label>
+                    <input
+                      type="time"
+                      value={editingAppointment ? form.appointment_time : time}
+                      onChange={editingAppointment
+                        ? (e) => setForm({ ...form, appointment_time: e.target.value })
+                        : (e) => setTime(e.target.value)
+                      }
+                      required
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Notes
+                  </label>
+                  <textarea
                     name="notes"
                     value={editingAppointment ? form.notes : notes}
                     onChange={editingAppointment
                       ? (e) => setForm({ ...form, notes: e.target.value })
                       : (e) => setNotes(e.target.value)
                     }
-                    multiline
                     rows={3}
                     placeholder="Any special requirements or notes..."
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
                   />
-                </Grid>
-              </Grid>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleDialogClose}>Cancel</Button>
-              <Button 
-                type="submit" 
-                variant="contained"
-                disabled={loading}
-                startIcon={loading ? <CircularProgress size={20} /> : null}
-              >
-                {loading ? "Processing..." : (editingAppointment ? 'Update' : 'Book')}
-              </Button>
-            </DialogActions>
-          </Box>
-        </Dialog>
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <button
+                    type="button"
+                    onClick={handleDialogClose}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    type="submit" 
+                    disabled={loading}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2"
+                  >
+                    {loading && (
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    )}
+                    {loading ? "Processing..." : (editingAppointment ? 'Update' : 'Book')}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* Snackbar for feedback */}
-        <Snackbar
-          open={snackbarOpen}
-          autoHideDuration={4000}
-          onClose={handleSnackbarClose}
-          message={snackbarMessage}
-        />
-      </Box>
-    </Container>
+        {snackbarOpen && (
+          <div className="fixed bottom-4 left-4 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              {snackbarMessage}
+            </div>
+            <button
+              onClick={handleSnackbarClose}
+              className="ml-4 text-white hover:text-gray-200"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
