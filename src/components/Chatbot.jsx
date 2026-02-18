@@ -20,8 +20,11 @@ const Chatbot = ({ open, onClose }) => {
   };
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    // Only scroll if chatbot is open and more than one message (i.e., after user interaction)
+    if (open && messages.length > 1) {
+      scrollToBottom();
+    }
+  }, [messages, open]);
 
   const sendMessageToDialogflow = async (message) => {
     try {
