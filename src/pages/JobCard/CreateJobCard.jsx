@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../utils/api.js";
+
 const TABS = [
   { key: "regular", label: "Regular Maintenance" },
   { key: "body", label: "Body Repair" },
@@ -46,6 +47,7 @@ const CreateJobCard = () => {
           JobCardNumber: "JC-" + Date.now(),
           CreatedOn: new Date().toISOString(),
           StatusID: 6,
+          JobCardStatusName: "New",
         },
       );
       setMessage("Job Card created for appointment #" + id);

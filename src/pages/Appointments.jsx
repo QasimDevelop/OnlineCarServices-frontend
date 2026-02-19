@@ -129,7 +129,57 @@ const Appointments = () => {
       setSeverity("error");
     }
   };
-
+  const handleEdit = async (appointment) => {
+    setEditingAppointment(appointment);
+    setForm({
+      service_station: appointment.service_station,
+      service_type: appointment.service_type,
+      appointment_date: appointment.appointment_date,
+      appointment_time: appointment.appointment_time,
+      notes: appointment.notes || "",
+      vehicle_number: appointment.plate_number || "",
+      vin: appointment.vin || "",
+      AppointSlotID: appointment.AppointSlotID || null,
+    });
+    setSelectedStation(appointment.service_station);
+    setSelectedService(appointment.service_type);
+    setDate(appointment.appointment_date);
+    setTime(appointment.appointment_time);
+    setNotes(appointment.notes || "");
+    setSelectedSlot({
+      AppointmentSlotsID: appointment.AppointSlotID,
+      AppointmentTime: appointment.appointment_time,
+    });
+    setVehicleNumber(appointment.plate_number);
+    setVin(appointment.vin);
+    setOpenDialog(true);
+    try {
+      const response = await api.get(`/api/accounts/appointment-slots/`, {
+        params: {
+          appointment_date: appointment.appointment_date,
+        },
+      });
+      setAppointmentSlots(response.data);
+      // eslint-disable-next-line no-unused-vars
+    } catch (error) {
+      setAppointmentSlots([]);
+    }
+  };
+  const handleDelete = async (appointmentId) => {
+    if (!window.confirm("Are you sure you want to cancel this appointment?"))
+      return;
+    setLoading(true);
+    try {
+      await api.delete(`/api/accounts/appointments/${appointmentId}/`);
+      setSnackbarMessage("Appointment cancelled successfully!");
+      setSnackbarOpen(true);
+      await fetchAppointments(); // Refresh the list
+    } catch (err) {
+      setSnackbarMessage("Failed to cancel appointment.");
+      setSnackbarOpen(true);
+    }
+    setLoading(false);
+  };
   const fetchServiceStations = async () => {
     try {
       const response = await api.get("/api/accounts/service-stations/");
@@ -195,6 +245,9 @@ const Appointments = () => {
         appointment_date: "",
         appointment_time: "",
         notes: "",
+        vehicle_number: "",
+        vin: "",
+        selectedSlot: null,
       });
       setSelectedStation("");
       setSelectedService("");
@@ -203,12 +256,15 @@ const Appointments = () => {
       setNotes("");
       setAppointmentSlots([]);
       setSelectedSlot(null);
+      setVehicleNumber("");
+      setVin("");
       await fetchAppointments();
     } catch (err) {
-      setSnackbarMessage(
+      const apiError =
+        err.response?.data?.non_field_errors?.[0] ||
         err.response?.data?.error ||
-          "Failed to schedule/update appointment. Please check your input.",
-      );
+        "Failed to schedule/update appointment. Please check your input.";
+      setSnackbarMessage(apiError);
       setSnackbarOpen(true);
     }
     setLoading(false);
@@ -310,6 +366,8 @@ const Appointments = () => {
     setNotes("");
     setEditingAppointment(null);
     setOpenDialog(true);
+    setVehicleNumber("");
+    setVin("");
   };
 
   const handleDialogClose = () => {
@@ -317,7 +375,6 @@ const Appointments = () => {
     setSelectedStation(null);
     setSelectedService(null);
   };
-
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
   };
@@ -584,12 +641,14 @@ const Appointments = () => {
                     >
                       Edit
                     </button>
-                    <button
-                      onClick={() => handleDelete(appointment.id)}
-                      className="flex-1 px-3 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm"
-                    >
-                      Cancel
-                    </button>
+                    {appointment.status === "pending" && (
+                      <button
+                        onClick={() => handleDelete(appointment.id)}
+                        className="flex-1 px-3 py-2 text-red-600 border border-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm"
+                      >
+                        Cancel
+                      </button>
+                    )}
                     {appointment.service_station_latitude &&
                       appointment.service_station_longitude && (
                         <button
@@ -794,7 +853,9 @@ const Appointments = () => {
                           key={slot.id}
                           onClick={() => setSelectedSlot(slot)}
                           className={`px-4 py-2 rounded-lg border ${
-                            selectedSlot && selectedSlot.id === slot.id
+                            selectedSlot &&
+                            selectedSlot.AppointmentSlotsID ===
+                              slot.AppointmentSlotsID
                               ? "bg-blue-600 text-white"
                               : "bg-gray-100 text-gray-800"
                           }`}
