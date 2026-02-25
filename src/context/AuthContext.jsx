@@ -18,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   // Save token to localStorage whenever it changes
   const login = (newToken) => {
     setToken(newToken);
+    localStorage.setItem("token", newToken);
     try {
       const decoded = jwtDecode(newToken);
       setUser(decoded); // set user info from token

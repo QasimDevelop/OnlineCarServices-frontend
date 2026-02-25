@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../../utils/api.js";
 
 const STATUS_TABS = [
@@ -12,6 +13,8 @@ const AllJobCardsDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("New");
   const [openAction, setOpenAction] = useState(null);
+  const navigate = useNavigate();
+  const { id } = useParams();
 
   useEffect(() => {
     const fetchJobCards = async () => {
@@ -42,8 +45,8 @@ const AllJobCardsDashboard = () => {
   };
 
   const handleAssignTask = (JobCardID) => {
-    // Navigate or open modal for task assignment
     setOpenAction(null);
+    navigate(`/assign-task/${JobCardID}`);
   };
   return (
     <div className="max-w-6xl mx-auto mt-10">
@@ -89,7 +92,11 @@ const AllJobCardsDashboard = () => {
                   <div className="ml-auto relative">
                     <button
                       className="bg-gray-200 px-4 py-2 rounded font-semibold flex items-center gap-2 hover:bg-gray-300"
-                      onClick={() => setOpenAction(card.JobCardID)}
+                      onClick={() =>
+                        setOpenAction(
+                          openAction === card.JobCardID ? null : card.JobCardID,
+                        )
+                      }
                     >
                       Actions <span>▼</span>
                     </button>
@@ -107,7 +114,12 @@ const AllJobCardsDashboard = () => {
                         >
                           Task Assignment
                         </button>
-                        {/* Add more actions as needed */}
+                        <button
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                          onClick={() => handleTaskStart(card.JobCardID)}
+                        >
+                          Start JobCard
+                        </button>
                       </div>
                     )}
                   </div>

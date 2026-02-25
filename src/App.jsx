@@ -11,6 +11,7 @@ import Signup from "./pages/Signup";
 import Appointments from "./pages/Appointments";
 import Dashboard from "./pages/Dashboard";
 import AllJobCards from "./pages/JobCard/AllJobCards";
+import AssignTask from "./pages/JobCard/AssignTask";
 import CreateJobCard from "./pages/JobCard/CreateJobCard";
 import ServiceStations from "./pages/ServiceStations";
 import StationServices from "./pages/StationServices";
@@ -77,6 +78,10 @@ const App = () => {
                 />
                 <Route path="/CreateJobCard/:id" element={<CreateJobCard />} />
                 <Route path="/all-job-cards" element={<AllJobCards />} />
+                <Route
+                  path="/assign-task/:JobCardID"
+                  element={<AssignTask />}
+                />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </main>

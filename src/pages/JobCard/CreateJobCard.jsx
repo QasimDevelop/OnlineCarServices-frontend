@@ -41,7 +41,7 @@ const CreateJobCard = () => {
           bodyRepair: bodyRepair,
           mechanical: mechanical,
           concerns: concerns,
-          BranchName: 1,
+          ServiceStationID: 5,
           JobCardTypeName: "Regular Maintenance",
           JobConcernDescription: "N/A",
           JobCardNumber: "JC-" + Date.now(),
@@ -66,7 +66,10 @@ const CreateJobCard = () => {
 
   const handleSaveConcern = () => {
     if (concernText.trim()) {
-      setConcerns([...concerns, { text: concernText, type: concernType }]);
+      setConcerns([
+        ...concerns,
+        { JobConcernDescription: concernText, JobConcernTypeName: concernType },
+      ]);
       setShowConcernModal(false);
       setMessage("Job Concern added!");
       setTimeout(() => setMessage(""), 2000);
